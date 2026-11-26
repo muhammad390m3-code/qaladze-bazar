@@ -210,6 +210,7 @@
       font-size: 0.88rem;
       color: var(--muted);
       flex: 1;
+      white-space: pre-line;
     }
 
     .card-footer {
@@ -242,7 +243,6 @@
       font-size: 1.15rem;
     }
 
-    /* Modals / Drawers */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -420,7 +420,6 @@
     <section id="productsGrid" class="grid"></section>
   </main>
 
-  <!-- Cart Modal -->
   <div id="cartModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal">
       <div class="modal-head">
@@ -454,7 +453,6 @@
     </div>
   </div>
 
-  <!-- Admin Login Modal -->
   <div id="adminLoginModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal" style="max-width: 400px;">
       <div class="modal-head">
@@ -471,7 +469,6 @@
     </div>
   </div>
 
-  <!-- Admin Panel Modal -->
   <div id="adminPanelModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal">
       <div class="modal-head">
@@ -531,7 +528,7 @@
     const STORE_CONFIG = {
       whatsapp: "9647508475838",
       telegramChatId: "8836139067",
-      telegramBotToken: "", // ئەگەر تۆکنی بۆتت هەیە لێرە دایبنێ
+      telegramBotToken: "",
       storageProductsKey: "qaladze_bazar_products_v1",
       storageCartKey: "qaladze_bazar_cart_v1"
     };
@@ -540,21 +537,39 @@
       .map((c) => String.fromCharCode(c))
       .join("");
 
+    const DEFAULT_AMAZON_QALADZE = {
+      id: "prod_1795652935267_wyz0",
+      name: "ئەمەزۆن قەڵادزێ",
+      price: "10000",
+      category: "ئەلیکترۆنی",
+      image: "https://i.supaimg.com/8c6fe497-441e-45e3-aa45-5a66985cfe71/014cee5b-7ecb-4f01-af7c-0a19e607efc6.png",
+      description: "بۆکسی ئەمەزۆن ئەلیکتڕۆنیک کیلۆی 10هەزار دینار\nبۆکسەکە پێک دێت لە بابەتی ئەلیتڕۆنی جۆراو جۆر\nبەهیچ شێوەیەک بابەتی نا شەرعی تێدانیە و زبڵ تێدانیە..."
+    };
+
+    function loadProducts() {
+      const fallback = [DEFAULT_AMAZON_QALADZE];
+      try {
+        const raw = localStorage.getItem(STORE_CONFIG.storageProductsKey);
+        if (!raw) {
+          localStorage.setItem(STORE_CONFIG.storageProductsKey, JSON.stringify(fallback));
+          return fallback;
+        }
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          localStorage.setItem(STORE_CONFIG.storageProductsKey, JSON.stringify(fallback));
+          return fallback;
+        }
+        return parsed;
+      } catch {
+        return fallback;
+      }
+    }
+
     let products = loadProducts();
     let cart = loadCart();
     let activeCategory = "هەموو";
     let searchQuery = "";
     let isAdminAuthenticated = false;
-
-    function loadProducts() {
-      try {
-        const raw = localStorage.getItem(STORE_CONFIG.storageProductsKey);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    }
 
     function saveProducts() {
       localStorage.setItem(STORE_CONFIG.storageProductsKey, JSON.stringify(products));
@@ -599,7 +614,10 @@
 
     function renderProducts() {
       const grid = document.getElementById("productsGrid");
-      const filtered = products.filter((p) => {
+      if (!grid) return;
+
+      const listToRender = Array.isArray(products) && products.length ? products : [DEFAULT_AMAZON_QALADZE];
+      const filtered = listToRender.filter((p) => {
         const matchCat = activeCategory === "هەموو" || p.category === activeCategory;
         const q = searchQuery.trim().toLowerCase();
         const matchSearch =
@@ -969,3 +987,4 @@
   </script>
 </body>
 </html>
+
