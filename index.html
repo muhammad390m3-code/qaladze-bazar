@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>قەڵادزێ بازاڕ | Qaladze Bazar</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #0b1120;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-dark: #0284c7;
+      --accent: #22c55e;
+      --danger: #ef4444;
+      --border: rgba(148, 163, 184, 0.18);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+    }
+
+    .nav-wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .brand-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button, input, select, textarea {
+      font-size: 0.95rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    button {
+      cursor: pointer;
+      padding: 8px 14px;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--surface);
+      transition: 0.18s ease;
+    }
+
+    button:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary-dark);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary);
+      color: #082f49;
+    }
+
+    .btn-success {
+      background: #15803d;
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .btn-ghost {
+      background: transparent;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 22px 18px 60px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .categories {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cat-btn.active {
+      background: var(--primary-dark);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .search-box {
+      min-width: 220px;
+      flex: 1;
+      max-width: 320px;
+      padding: 9px 12px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 175px;
+      object-fit: cover;
+      background: var(--surface-2);
+      display: block;
+    }
+
+    .card-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .badge {
+      align-self: flex-start;
+      font-size: 0.75rem;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .card-footer {
+      padding: 12px 14px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .price {
+      font-weight: 800;
+      color: #4ade80;
+      font-size: 1rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+    }
+
+    .empty-state h3 {
+      color: var(--text);
+      margin-bottom: 8px;
+      font-size: 1.15rem;
+    }
+
+    /* Modals / Drawers */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head h2 {
+      font-size: 1.15rem;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 9px 12px;
+      background: var(--surface-2);
+      color: var(--text);
+      width: 100%;
+    }
+
+    .form-group textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      background: var(--surface-2);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .cart-item-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .qty-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qty-box button {
+      padding: 4px 10px;
+    }
+
+    .admin-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .admin-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      background: var(--surface-2);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid var(--primary);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.22s ease;
+      z-index: 90;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <div class="brand">
+        <span class="brand-title">قەڵادزێ بازاڕ — Qaladze Bazar</span>
+        <span class="brand-sub">داواکاری خێرا بە واتسئەپ و تێلیگرام</span>
+      </div>
+      <div class="nav-actions">
+        <button id="openCartBtn" class="btn-primary">
+          سەبەتە (<span id="cartCount">0</span>)
+        </button>
+        <button id="openAdminBtn" class="btn-ghost">ئەدمین</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="categories" id="categoryTabs">
+        <button class="cat-btn active" data-cat="هەموو">هەموو</button>
+        <button class="cat-btn" data-cat="ئەلیکترۆنی">ئەلیکترۆنی</button>
+        <button class="cat-btn" data-cat="کەلوپەل">کەلوپەل</button>
+      </div>
+      <input id="searchInput" class="search-box" type="search" placeholder="گەڕان بەدوای کاڵا..." />
+    </div>
+
+    <section id="productsGrid" class="grid"></section>
+  </main>
+
+  <!-- Cart Modal -->
+  <div id="cartModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>سەبەتەی داواکاری</h2>
+        <button type="button" data-close="cartModal">داخستن</button>
+      </div>
+      <div id="cartItemsContainer"></div>
+      <div id="cartSummary" style="margin: 14px 0; font-weight: 800; font-size: 1.05rem;"></div>
+
+      <div class="form-group">
+        <label for="customerName">ناوی کڕیار</label>
+        <input id="customerName" type="text" placeholder="ناوت بنووسە" />
+      </div>
+      <div class="form-group">
+        <label for="customerPhone">ژمارەی مۆبایل</label>
+        <input id="customerPhone" type="tel" placeholder="0750..." />
+      </div>
+      <div class="form-group">
+        <label for="customerAddress">ناونیشان (بۆ نموونە: قەڵادزێ)</label>
+        <input id="customerAddress" type="text" placeholder="گەڕەک یان ناونیشانی گەیاندن" />
+      </div>
+
+      <div class="row-actions" style="margin-top: 14px;">
+        <button id="orderWhatsappBtn" type="button" class="btn-success" style="flex: 1;">
+          ناردن بۆ واتسئەپ
+        </button>
+        <button id="orderTelegramBtn" type="button" class="btn-primary" style="flex: 1;">
+          ناردن بۆ تێلیگرام
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div id="adminLoginModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-head">
+        <h2>چوونەژوورەوەی ئەدمین</h2>
+        <button type="button" data-close="adminLoginModal">داخستن</button>
+      </div>
+      <form id="adminLoginForm">
+        <div class="form-group">
+          <label for="adminPassInput">کۆدی نهێنی</label>
+          <input id="adminPassInput" type="password" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%;">چوونەژوورەوە</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel Modal -->
+  <div id="adminPanelModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>بەڕێوەبردنی کاڵاکان</h2>
+        <div class="row-actions">
+          <button id="adminLogoutBtn" type="button" class="btn-danger">دەرچوون</button>
+          <button type="button" data-close="adminPanelModal">داخستن</button>
+        </div>
+      </div>
+
+      <form id="addProductForm">
+        <div class="form-group">
+          <label for="prodName">ناوی کاڵا</label>
+          <input id="prodName" type="text" required placeholder="نموونە: هێدفۆنی بێ وایەر" />
+        </div>
+        <div class="form-group">
+          <label for="prodPrice">نرخ (دینار یان دۆلار)</label>
+          <input id="prodPrice" type="number" step="any" min="0" required placeholder="نموونە: 25000" />
+        </div>
+        <div class="form-group">
+          <label for="prodCategory">پۆلێن</label>
+          <select id="prodCategory">
+            <option value="ئەلیکترۆنی">ئەلیکترۆنی</option>
+            <option value="کەلوپەل">کەلوپەل</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="prodImage">لینک یان وێنەی کاڵا (ئارەزوومەندانە)</label>
+          <input id="prodImage" type="text" placeholder="https://..." />
+        </div>
+        <div class="form-group">
+          <label for="prodDesc">کورتە وەسف</label>
+          <textarea id="prodDesc" placeholder="زانیاری کورت دەربارەی کاڵاکە..."></textarea>
+        </div>
+        <button type="submit" class="btn-success" style="width: 100%;">زیادکردنی کاڵا</button>
+      </form>
+
+      <div class="admin-section">
+        <h3 style="margin-bottom: 10px; font-size: 1rem;">پشتگیری و گواستنەوەی داتا (JSON)</h3>
+        <div class="row-actions">
+          <button id="exportJsonBtn" type="button">هەناردنی JSON</button>
+          <button id="importJsonBtn" type="button">هێنانی JSON</button>
+          <input id="importJsonFile" type="file" accept="application/json,.json" style="display: none;" />
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h3 style="margin-bottom: 10px; font-size: 1rem;">کاڵاکانی ئێستا (<span id="adminProdCount">0</span>)</h3>
+        <div id="adminProductsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORE_CONFIG = {
+      whatsapp: "9647508475838",
+      telegramChatId: "8836139067",
+      telegramBotToken: "", // ئەگەر تۆکنی بۆتت هەیە لێرە دایبنێ
+      storageProductsKey: "qaladze_bazar_products_v1",
+      storageCartKey: "qaladze_bazar_cart_v1"
+    };
+
+    const _authKey = [114, 101, 103, 97, 52, 56, 52, 56]
+      .map((c) => String.fromCharCode(c))
+      .join("");
+
+    let products = loadProducts();
+    let cart = loadCart();
+    let activeCategory = "هەموو";
+    let searchQuery = "";
+    let isAdminAuthenticated = false;
+
+    function loadProducts() {
+      try {
+        const raw = localStorage.getItem(STORE_CONFIG.storageProductsKey);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveProducts() {
+      localStorage.setItem(STORE_CONFIG.storageProductsKey, JSON.stringify(products));
+    }
+
+    function loadCart() {
+      try {
+        const raw = localStorage.getItem(STORE_CONFIG.storageCartKey);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveCart() {
+      localStorage.setItem(STORE_CONFIG.storageCartKey, JSON.stringify(cart));
+      updateCartBadge();
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => el.classList.remove("show"), 2600);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function formatPrice(val) {
+      const num = Number(val);
+      if (Number.isNaN(num)) return escapeHtml(val);
+      return num.toLocaleString("en-US");
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById("productsGrid");
+      const filtered = products.filter((p) => {
+        const matchCat = activeCategory === "هەموو" || p.category === activeCategory;
+        const q = searchQuery.trim().toLowerCase();
+        const matchSearch =
+          !q ||
+          String(p.name || "").toLowerCase().includes(q) ||
+          String(p.description || "").toLowerCase().includes(q);
+        return matchCat && matchSearch;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <h3>هیچ کاڵایەک لەم بەشەدا نییە</h3>
+            <p>لە ڕێگەی دوگمەی (ئەدمین)ـەوە هەر کاتێک بتەوێت دەتوانیت کاڵای نوێ زیاد بکەیت.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered
+        .map(
+          (p) => `
+          <article class="card">
+            ${
+              p.image
+                ? `<img class="card-img" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'" />`
+                : `<div class="card-img" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.85rem;">بێ وێنە</div>`
+            }
+            <div class="card-body">
+              <span class="badge">${escapeHtml(p.category || "کەلوپەل")}</span>
+              <h3 class="card-title">${escapeHtml(p.name)}</h3>
+              <p class="card-desc">${escapeHtml(p.description || "")}</p>
+            </div>
+            <div class="card-footer">
+              <span class="price">${formatPrice(p.price)}</span>
+              <button type="button" class="btn-primary" onclick="addToCart('${escapeHtml(p.id)}')">
+                زیادکردن بۆ سەبەتە
+              </button>
+            </div>
+          </article>
+        `
+        )
+        .join("");
+    }
+
+    function updateCartBadge() {
+      const totalQty = cart.reduce((sum, item) => sum + Number(item.qty || 1), 0);
+      document.getElementById("cartCount").textContent = totalQty;
+    }
+
+    window.addToCart = function (productId) {
+      const prod = products.find((item) => String(item.id) === String(productId));
+      if (!prod) return;
+      const existing = cart.find((item) => String(item.id) === String(productId));
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({
+          id: prod.id,
+          name: prod.name,
+          price: Number(prod.price) || 0,
+          qty: 1
+        });
+      }
+      saveCart();
+      showToast("کاڵاکە زیاد کرا بۆ سەبەتە");
+    };
+
+    window.changeCartQty = function (productId, delta) {
+      const idx = cart.findIndex((item) => String(item.id) === String(productId));
+      if (idx === -1) return;
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) {
+        cart.splice(idx, 1);
+      }
+      saveCart();
+      renderCart();
+    };
+
+    function renderCart() {
+      const container = document.getElementById("cartItemsContainer");
+      const summary = document.getElementById("cartSummary");
+
+      if (!cart.length) {
+        container.innerHTML = `<p style="color:var(--muted);text-align:center;padding:18px;">سەبەتەکەت بەتاڵە.</p>`;
+        summary.textContent = "";
+        return;
+      }
+
+      container.innerHTML = cart
+        .map(
+          (item) => `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <div class="cart-item-title">${escapeHtml(item.name)}</div>
+              <div class="cart-item-sub">نرخی یەک دانە: ${formatPrice(item.price)}</div>
+            </div>
+            <div class="qty-box">
+              <button type="button" onclick="changeCartQty('${escapeHtml(item.id)}', -1)">-</button>
+              <span>${item.qty}</span>
+              <button type="button" onclick="changeCartQty('${escapeHtml(item.id)}', 1)">+</button>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+
+      const total = cart.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 1), 0);
+      summary.textContent = `کۆی گشتی: ${formatPrice(total)}`;
+    }
+
+    function buildOrderMessage() {
+      const name = document.getElementById("customerName").value.trim() || "نەنووسراوە";
+      const phone = document.getElementById("customerPhone").value.trim() || "نەنووسراوە";
+      const address = document.getElementById("customerAddress").value.trim() || "نەنووسراوە";
+
+      const lines = cart.map(
+        (item, i) =>
+          `${i + 1}. ${item.name} × ${item.qty} (${formatPrice(Number(item.price || 0) * Number(item.qty || 1))})`
+      );
+      const total = cart.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 1), 0);
+
+      return [
+        "داواکاری نوێ — قەڵادزێ بازاڕ",
+        "------------------------",
+        `ناو: ${name}`,
+        `مۆبایل: ${phone}`,
+        `ناونیشان: ${address}`,
+        "------------------------",
+        "کاڵاکان:",
+        ...lines,
+        "------------------------",
+        `کۆی گشتی: ${formatPrice(total)}`
+      ].join("\n");
+    }
+
+    document.getElementById("orderWhatsappBtn").addEventListener("click", () => {
+      if (!cart.length) {
+        showToast("سەرەتا کاڵایەک بخەرە سەبەتە");
+        return;
+      }
+      const text = encodeURIComponent(buildOrderMessage());
+      const url = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${text}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+
+    document.getElementById("orderTelegramBtn").addEventListener("click", async () => {
+      if (!cart.length) {
+        showToast("سەرەتا کاڵایەک بخەرە سەبەتە");
+        return;
+      }
+      const message = buildOrderMessage();
+
+      if (STORE_CONFIG.telegramBotToken) {
+        try {
+          const res = await fetch(
+            `https://api.telegram.org/bot${STORE_CONFIG.telegramBotToken}/sendMessage`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: STORE_CONFIG.telegramChatId,
+                text: message
+              })
+            }
+          );
+          if (res.ok) {
+            showToast("داواکارییەکە بۆ تێلیگرام نێردرا");
+            return;
+          }
+        } catch {
+          // fallback to share link
+        }
+      }
+
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+        `Chat ID: ${STORE_CONFIG.telegramChatId}`
+      )}&text=${encodeURIComponent(message)}`;
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    });
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("open");
+        el.setAttribute("aria-hidden", "false");
+      }
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove("open");
+        el.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    document.querySelectorAll("[data-close]").forEach((btn) => {
+      btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close")));
+    });
+
+    document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+      backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop) {
+          closeModal(backdrop.id);
+        }
+      });
+    });
+
+    document.getElementById("openCartBtn").addEventListener("click", () => {
+      renderCart();
+      openModal("cartModal");
+    });
+
+    document.getElementById("openAdminBtn").addEventListener("click", () => {
+      if (isAdminAuthenticated) {
+        renderAdminProducts();
+        openModal("adminPanelModal");
+      } else {
+        document.getElementById("adminPassInput").value = "";
+        openModal("adminLoginModal");
+      }
+    });
+
+    document.getElementById("adminLoginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("adminPassInput");
+      if (input.value === _authKey) {
+        isAdminAuthenticated = true;
+        input.value = "";
+        closeModal("adminLoginModal");
+        renderAdminProducts();
+        openModal("adminPanelModal");
+        showToast("بەخێربێیت بۆ بەشی ئەدمین");
+      } else {
+        showToast("کۆدی نهێنی هەڵەیە");
+      }
+    });
+
+    document.getElementById("adminLogoutBtn").addEventListener("click", () => {
+      isAdminAuthenticated = false;
+      closeModal("adminPanelModal");
+      showToast("چوویتە دەرەوە لە بەشی ئەدمین");
+    });
+
+    document.getElementById("addProductForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("prodName").value.trim();
+      const price = document.getElementById("prodPrice").value.trim();
+      const category = document.getElementById("prodCategory").value;
+      const image = document.getElementById("prodImage").value.trim();
+      const description = document.getElementById("prodDesc").value.trim();
+
+      if (!name || price === "") return;
+
+      products.unshift({
+        id: "prod_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        name,
+        price,
+        category,
+        image,
+        description
+      });
+
+      saveProducts();
+      renderProducts();
+      renderAdminProducts();
+      e.target.reset();
+      showToast("کاڵا بە سەرکەوتوویی زیاد کرا");
+    });
+
+    window.deleteProduct = function (productId) {
+      products = products.filter((p) => String(p.id) !== String(productId));
+      cart = cart.filter((c) => String(c.id) !== String(productId));
+      saveProducts();
+      saveCart();
+      renderProducts();
+      renderAdminProducts();
+      showToast("کاڵاکە سڕایەوە");
+    };
+
+    function renderAdminProducts() {
+      const list = document.getElementById("adminProductsList");
+      document.getElementById("adminProdCount").textContent = products.length;
+
+      if (!products.length) {
+        list.innerHTML = `<p style="color:var(--muted);font-size:0.9rem;">هیچ کاڵایەک زیاد نەکراوە.</p>`;
+        return;
+      }
+
+      list.innerHTML = products
+        .map(
+          (p) => `
+          <div class="admin-list-item">
+            <div>
+              <div style="font-weight:700;">${escapeHtml(p.name)}</div>
+              <div style="font-size:0.82rem;color:var(--muted);">
+                ${escapeHtml(p.category)} — ${formatPrice(p.price)}
+              </div>
+            </div>
+            <button type="button" class="btn-danger" onclick="deleteProduct('${escapeHtml(p.id)}')">
+              سڕینەوە
+            </button>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    document.getElementById("exportJsonBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(products, null, 2)], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "qaladze-bazar-products.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("فایلی JSON هەنارد کرا");
+    });
+
+    document.getElementById("importJsonBtn").addEventListener("click", () => {
+      document.getElementById("importJsonFile").click();
+    });
+
+    document.getElementById("importJsonFile").addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(String(reader.result || "[]"));
+          if (!Array.isArray(imported)) {
+            showToast("فایلی JSON گونجاو نییە");
+            return;
+          }
+          products = imported;
+          saveProducts();
+          renderProducts();
+          renderAdminProducts();
+          showToast("کاڵاکان لە JSON هێنرانەوە");
+        } catch {
+          showToast("هەڵە لە خوێندنەوەی فایلی JSON");
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+
+    document.querySelectorAll(".cat-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeCategory = btn.getAttribute("data-cat");
+        renderProducts();
+      });
+    });
+
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      renderProducts();
+    });
+
+    updateCartBadge();
+    renderProducts();
+  </script>
+</body>
+</html>
