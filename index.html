@@ -529,6 +529,8 @@
       whatsapp: "9647508475838",
       telegramChatId: "8836139067",
       telegramBotToken: "",
+      firebaseDatabaseUrl: "https://qaladze-bazar-default-rtdb.firebaseio.com",
+      firebaseProductsPath: "products",
       storageProductsKey: "qaladze_bazar_products_v1",
       storageCartKey: "qaladze_bazar_cart_v1"
     };
@@ -546,7 +548,7 @@
       description: "بۆکسی ئەمەزۆن ئەلیکتڕۆنیک کیلۆی 10هەزار دینار\nبۆکسەکە پێک دێت لە بابەتی ئەلیتڕۆنی جۆراو جۆر\nبەهیچ شێوەیەک بابەتی نا شەرعی تێدانیە و زبڵ تێدانیە..."
     };
 
-    function loadProducts() {
+    function loadLocalProducts() {
       const fallback = [DEFAULT_AMAZON_QALADZE];
       try {
         const raw = localStorage.getItem(STORE_CONFIG.storageProductsKey);
@@ -565,14 +567,65 @@
       }
     }
 
-    let products = loadProducts();
+    function getFirebaseProductsEndpoint() {
+      const base = String(STORE_CONFIG.firebaseDatabaseUrl || "").replace(/\/+$/, "");
+      const path = String(STORE_CONFIG.firebaseProductsPath || "products").replace(/^\/+|\/+$/g, "");
+      return `${base}/${path}.json`;
+    }
+
+    async function syncProductsFromFirebase() {
+      if (!STORE_CONFIG.firebaseDatabaseUrl) return;
+      try {
+        const res = await fetch(getFirebaseProductsEndpoint(), { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+          products = data.filter(Boolean);
+          saveLocalProductsOnly();
+          renderProducts();
+          if (isAdminAuthenticated) renderAdminProducts();
+        } else if (data && typeof data === "object") {
+          const list = Object.values(data).filter(Boolean);
+          if (list.length > 0) {
+            products = list;
+            saveLocalProductsOnly();
+            renderProducts();
+            if (isAdminAuthenticated) renderAdminProducts();
+          }
+        } else {
+          await pushProductsToFirebase(products);
+        }
+      } catch {}
+    }
+
+    async function pushProductsToFirebase(list) {
+      if (!STORE_CONFIG.firebaseDatabaseUrl) return false;
+      try {
+        const res = await fetch(getFirebaseProductsEndpoint(), {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(list)
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    let products = loadLocalProducts();
     let cart = loadCart();
     let activeCategory = "هەموو";
     let searchQuery = "";
     let isAdminAuthenticated = false;
 
-    function saveProducts() {
+    function saveLocalProductsOnly() {
       localStorage.setItem(STORE_CONFIG.storageProductsKey, JSON.stringify(products));
+    }
+
+    async function saveProducts() {
+      saveLocalProductsOnly();
+      await pushProductsToFirebase(products);
     }
 
     function loadCart() {
@@ -788,9 +841,7 @@
             showToast("داواکارییەکە بۆ تێلیگرام نێردرا");
             return;
           }
-        } catch {
-          // fallback to share link
-        }
+        } catch {}
       }
 
       const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(
@@ -863,128 +914,7 @@
       showToast("چوویتە دەرەوە لە بەشی ئەدمین");
     });
 
-    document.getElementById("addProductForm").addEventListener("submit", (e) => {
+    document.getElementById("addProductForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("prodName").value.trim();
-      const price = document.getElementById("prodPrice").value.trim();
-      const category = document.getElementById("prodCategory").value;
-      const image = document.getElementById("prodImage").value.trim();
-      const description = document.getElementById("prodDesc").value.trim();
-
-      if (!name || price === "") return;
-
-      products.unshift({
-        id: "prod_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
-        name,
-        price,
-        category,
-        image,
-        description
-      });
-
-      saveProducts();
-      renderProducts();
-      renderAdminProducts();
-      e.target.reset();
-      showToast("کاڵا بە سەرکەوتوویی زیاد کرا");
-    });
-
-    window.deleteProduct = function (productId) {
-      products = products.filter((p) => String(p.id) !== String(productId));
-      cart = cart.filter((c) => String(c.id) !== String(productId));
-      saveProducts();
-      saveCart();
-      renderProducts();
-      renderAdminProducts();
-      showToast("کاڵاکە سڕایەوە");
-    };
-
-    function renderAdminProducts() {
-      const list = document.getElementById("adminProductsList");
-      document.getElementById("adminProdCount").textContent = products.length;
-
-      if (!products.length) {
-        list.innerHTML = `<p style="color:var(--muted);font-size:0.9rem;">هیچ کاڵایەک زیاد نەکراوە.</p>`;
-        return;
-      }
-
-      list.innerHTML = products
-        .map(
-          (p) => `
-          <div class="admin-list-item">
-            <div>
-              <div style="font-weight:700;">${escapeHtml(p.name)}</div>
-              <div style="font-size:0.82rem;color:var(--muted);">
-                ${escapeHtml(p.category)} — ${formatPrice(p.price)}
-              </div>
-            </div>
-            <button type="button" class="btn-danger" onclick="deleteProduct('${escapeHtml(p.id)}')">
-              سڕینەوە
-            </button>
-          </div>
-        `
-        )
-        .join("");
-    }
-
-    document.getElementById("exportJsonBtn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(products, null, 2)], {
-        type: "application/json"
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "qaladze-bazar-products.json";
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast("فایلی JSON هەنارد کرا");
-    });
-
-    document.getElementById("importJsonBtn").addEventListener("click", () => {
-      document.getElementById("importJsonFile").click();
-    });
-
-    document.getElementById("importJsonFile").addEventListener("change", (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const imported = JSON.parse(String(reader.result || "[]"));
-          if (!Array.isArray(imported)) {
-            showToast("فایلی JSON گونجاو نییە");
-            return;
-          }
-          products = imported;
-          saveProducts();
-          renderProducts();
-          renderAdminProducts();
-          showToast("کاڵاکان لە JSON هێنرانەوە");
-        } catch {
-          showToast("هەڵە لە خوێندنەوەی فایلی JSON");
-        }
-      };
-      reader.readAsText(file);
-      e.target.value = "";
-    });
-
-    document.querySelectorAll(".cat-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        activeCategory = btn.getAttribute("data-cat");
-        renderProducts();
-      });
-    });
-
-    document.getElementById("searchInput").addEventListener("input", (e) => {
-      searchQuery = e.target.value;
-      renderProducts();
-    });
-
-    updateCartBadge();
-    renderProducts();
-  </script>
-</body>
-</html>
-
+      const price = document.get
